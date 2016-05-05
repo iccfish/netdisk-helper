@@ -36,15 +36,6 @@
                 input.nextElementSibling.click();
             }
         }
-    } else if (host === 'vdisk.weibo.com') {
-        //新浪微盘
-        if (self.location.pathname.indexOf("/lc/") !== -1) {
-            input = document.querySelector("#keypass");
-            if (getCode() && input) {
-                input.value = code;
-                document.querySelector("#validate a").click();
-            }
-        }
     } else {
         //其它网站，检测链接
         Array.prototype.slice.call(document.querySelectorAll("a[href*='pan.baidu.com'], a[href*='yunpan.cn'], a[href*='vdisk.weibo.com']")).forEach(function(link) {
