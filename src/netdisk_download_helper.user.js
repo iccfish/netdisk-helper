@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网盘提取工具
 // @namespace    http://www.fishlee.net/
-// @version      2.3
+// @version      2.4
 // @description  尽可能在支持的网盘（新浪微盘、百度网盘、360云盘等）自动输入提取码，省去下载的烦恼。
 // @author       木鱼(iFish)
 // @match        *://*/*
@@ -67,31 +67,25 @@
         while ((n = walk.nextNode())) a.push(n);
         return a;
     };
-    var linkifyTextBlockBaidu = function(text, eles, index) {
+    var generalLinkifyText = function(text, eles, index, testReg, validateRule) {
         var loopCount = 0,
-            originalText, code, match, url, testReg = /(http:\/\/)?((pan|yun)\.baidu\.com\/s\/([a-z\d]+))(.*?码.*?([a-z\d]+))?/gi,
+            originalText, code, match, url,
             linkifiedText = text;
         while ((match = testReg.exec(text))) {
             loopCount++;
             url = (match[1] || "http://") + match[2];
             originalText = match[1] + match[2];
-            code = match[6] || findCodeFromElements(eles, index, CODE_RULE_BAIDU) || "";
+            code = match[3] || findCodeFromElements(eles, index, validateRule) || "";
+            console.log("[网盘提取工具] 已处理网盘地址，URL=" + url + "，提取码=" + code + "模式：TEXTNODE");
             linkifiedText = linkifiedText.replace(originalText, "<a href='" + url + "#" + code + "' target='_blank'>" + url + '</a>');
         }
         return [loopCount, linkifiedText];
     };
+    var linkifyTextBlockBaidu = function(text, eles, index) {
+        return generalLinkifyText(text, eles, index, /(http:\/\/)?((?:pan|yun)\.baidu\.com\/s\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_BAIDU);
+    };
     var linkifyTextBlockYunpan = function(text, eles, index) {
-        var loopCount = 0,
-            originalText, code, match, url, testReg = /(http:\/\/)?(yunpan\.cn\/([a-z\d]+))(.*?码.*?([a-z\d]+))?/gi,
-            linkifiedText = text;
-        while ((match = testReg.exec(text))) {
-            loopCount++;
-            url = (match[1] || "http://") + match[2];
-            originalText = match[1] + match[2];
-            code = match[5] || findCodeFromElements(eles, index, CODE_RULE_YUNPAN) || "";
-            linkifiedText = linkifiedText.replace(originalText, "<a href='" + url + "#" + code + "' target='_blank'>" + url + '</a>');
-        }
-        return [loopCount, linkifiedText];
+        return generalLinkifyText(text, eles, index, /(http:\/\/)?(yunpan\.cn\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_YUNPAN);
     };
     var findCodeFromElements = function(eles, index, rule) {
         for (var i = 0; i < MAX_SEARCH_CODE_RANGE && i < eles.length; i++) {
@@ -99,7 +93,7 @@
             var codeReg = /码.*?([a-z\d]+)/gi;
             var codeMatch = codeReg.exec(text) && RegExp.$1;
             if (!codeMatch) continue;
-            var linkTestReg = /(http:|\.(net|cn|com|gov|cc|me))/gi;
+            var linkTestReg = /(https?:|\.(net|cn|com|gov|cc|me))/gi;
             if (linkTestReg.exec(txt) && linkTestReg.lastIndex <= codeReg.lastIndex) {
                 break;
             }
