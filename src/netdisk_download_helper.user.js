@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         网盘提取工具
 // @namespace    http://www.fishlee.net/
-// @version      2.5
-// @description  尽可能在支持的网盘（新浪微盘、百度网盘、360云盘等）自动输入提取码，省去下载的烦恼。
+// @version      2.6
+// @description  尽可能在支持的网盘自动输入提取码，省去下载的烦恼。
 // @author       木鱼(iFish)
 // @match        *://*/*
 // @grant        unsafeWindow
@@ -22,7 +22,7 @@
         } else code = null;
         return code;
     };
-    if ((host === 'pan.baidu.com' || host === 'yun.baidu.com')) {
+    if (/(pan|e?yun)\.baidu\.com/.test(host)) {
         //百度云盘
         if (path.indexOf("/share/") !== -1 && document.getElementById("accessCode") && getCode()) {
             document.getElementById("accessCode").value = code;
@@ -66,7 +66,7 @@
         var n, a = [],
             walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
         while ((n = walk.nextNode())) {
-            if(n.nodeName==='#text')
+            if (n.nodeName === '#text')
                 a.push(n);
         }
         return a;
@@ -78,17 +78,19 @@
         while ((match = testReg.exec(text))) {
             loopCount++;
             url = (match[1] || "http://") + match[2];
-            originalText = (match[1]||"") + match[2];
+            originalText = (match[1] || "") + match[2];
             code = match[3] || findCodeFromElements(eles, index, validateRule) || "";
+            if (!code)
+                continue;
             console.log("[网盘提取工具] 已处理网盘地址，URL=" + url + "，提取码=" + code + "模式：TEXTNODE");
             //fix double #
-            url=url.split('#')[0];
+            url = url.split('#')[0];
             linkifiedText = linkifiedText.replace(originalText, "<a href='" + url + "#" + code + "' target='_blank'>" + url + '</a>');
         }
         return [loopCount, linkifiedText];
     };
     var linkifyTextBlockBaidu = function(text, eles, index) {
-        return generalLinkifyText(text, eles, index, /(https?:\/\/)?((?:pan|yun)\.baidu\.com\/s\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_BAIDU);
+        return generalLinkifyText(text, eles, index, /(https?:\/\/)?((?:pan|e?yun)\.baidu\.com\/s\/(?:[a-z\d]+)(?:#[a-z\d-_]*)?)(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_BAIDU);
     };
     //var linkifyTextBlockYunpan = function(text, eles, index) {
     //    return generalLinkifyText(text, eles, index, /(https?:\/\/)?(yunpan\.cn\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_YUNPAN);
