@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网盘提取工具
 // @namespace    http://www.fishlee.net/
-// @version      2.6
+// @version      2.7
 // @description  尽可能在支持的网盘自动输入提取码，省去下载的烦恼。
 // @author       木鱼(iFish)
 // @match        *://*/*
@@ -24,18 +24,13 @@
     };
     if (/(pan|e?yun)\.baidu\.com/.test(host)) {
         //百度云盘
-        if (path.indexOf("/share/") !== -1 && document.getElementById("accessCode") && getCode()) {
-            document.getElementById("accessCode").value = code;
-            document.getElementById("submitBtn").click();
-        }
-    } else if (/^.*\.yunpan\.cn$/i.test(host)) {
-        //360云盘
-        if (self.location.pathname.indexOf("/lk/") !== -1) {
-            input = document.querySelector("input.pwd-input");
-            if (getCode() && input) {
-                input.value = code;
-                input.nextElementSibling.click();
-            }
+        if (path.indexOf("/share/") !== -1 && document.querySelector('form[name="accessForm"]') && getCode()) {
+            var target=document.querySelector('.pickpw input');
+            if(!target)
+                return;
+
+            target.value = code;
+            unsafeWindow.document.querySelector('form[name="accessForm"]').onsubmit();
         }
     } else {
         //其它网站，检测链接
