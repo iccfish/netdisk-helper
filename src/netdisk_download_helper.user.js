@@ -85,7 +85,7 @@
         return [loopCount, linkifiedText];
     };
     var linkifyTextBlockBaidu = function(text, eles, index) {
-        return generalLinkifyText(text, eles, index, /(https?:\/\/)?((?:pan|e?yun)\.baidu\.com\/s\/(?:[a-z\d]+)(?:#[a-z\d-_]*)?)(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_BAIDU);
+        return generalLinkifyText(text, eles, index, /(https?:\/\/)?((?:pan|e?yun)\.baidu\.com\/s\/(?:[a-z\d\-]+)(?:#[a-z\d-_]*)?)(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_BAIDU);
     };
     //var linkifyTextBlockYunpan = function(text, eles, index) {
     //    return generalLinkifyText(text, eles, index, /(https?:\/\/)?(yunpan\.cn\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_YUNPAN);
