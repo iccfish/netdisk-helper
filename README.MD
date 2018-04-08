@@ -11,6 +11,13 @@
 
 **官方博客**：[http://blog.fishlee.net/?p=3473](http://blog.fishlee.net/?p=3473)
 
+## 安装说明
+
+- 在Firefox上，您需要安装[**GreaseMonkey**](https://addons.mozilla.org/zh-CN/firefox/addon/greasemonkey/)或[**TamperMonkey**](https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/)扩展
+- 在Chrome上，您需要安装[**TamperMonkey**](https://chrome.google.com/webstore/detail/dhdgffkkebhmkfjojejmpbldmpobfkfo) 扩展
+
+在浏览器准备就绪后，在[脚本发布页面](https://greasyfork.org/zh-CN/scripts/18733-%E7%BD%91%E7%9B%98%E6%8F%90%E5%8F%96%E5%B7%A5%E5%85%B7)安装即可。
+
 ## 更新记录
 
 ### 2018-04-08 `2.8`
