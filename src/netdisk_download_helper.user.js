@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网盘提取工具
 // @namespace    http://www.fishlee.net/
-// @version      2.7
+// @version      2.8
 // @description  尽可能在支持的网盘自动输入提取码，省去下载的烦恼。
 // @author       木鱼(iFish)
 // @match        *://*/*
