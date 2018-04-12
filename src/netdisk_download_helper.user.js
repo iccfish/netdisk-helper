@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         网盘提取工具
 // @namespace    http://www.fishlee.net/
-// @version      2.8
+// @version      3.0
 // @description  尽可能在支持的网盘自动输入提取码，省去下载的烦恼。
 // @author       木鱼(iFish)
 // @match        *://*/*
 // @grant        unsafeWindow
 // @icon         https://ssl-static.fishlee.net/resources/emot/xr/22.gif
 // ==/UserScript==
+
 (function(window, self, unsafeWindow) {
     'use strict';
     var timeStart = new Date().getTime();
@@ -25,13 +26,20 @@
     if (/(pan|e?yun)\.baidu\.com/.test(host)) {
         //百度云盘
         if (path.indexOf("/share/") !== -1 && document.querySelector('form[name="accessForm"]') && getCode()) {
-            var target=document.querySelector('.pickpw input');
-            if(!target)
+            var target = document.querySelector('.pickpw input');
+            if (!target)
                 return;
 
             target.value = code;
             unsafeWindow.document.querySelector('form[name="accessForm"]').onsubmit();
         }
+    } else if (/pan\.lanzou\.com/.test(host) && getCode()) {
+        var target = document.querySelector('#pwd');
+        if (!target)
+            return;
+
+        target.value = code;
+        unsafeWindow.document.querySelector('#sub').dispatchEvent(new UIEvent('click'));
     } else {
         //其它网站，检测链接
         Array.prototype.slice.call(document.querySelectorAll("a[href*='pan.baidu.com'], a[href*='yunpan.cn'], a[href*='vdisk.weibo.com']")).forEach(function(link) {
@@ -53,8 +61,7 @@
 (function() {
     'use strict';
     //consts...
-    var CODE_RULE_BAIDU = /^([a-z\d]{4})$/i;
-    var CODE_RULE_YUNPAN = /^([a-z\d]{4})$/i;
+    var CODE_RULE_COMMON = /^([a-z\d]{4})$/i;
     var MAX_SEARCH_CODE_RANGE = 5;
     //functions...
     var textNodesUnder = function(el) {
@@ -85,11 +92,11 @@
         return [loopCount, linkifiedText];
     };
     var linkifyTextBlockBaidu = function(text, eles, index) {
-        return generalLinkifyText(text, eles, index, /(https?:\/\/)?((?:pan|e?yun)\.baidu\.com\/s\/(?:[a-z\d\-_]+)(?:#[a-z\d-_]*)?)(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_BAIDU);
+        return generalLinkifyText(text, eles, index, /(https?:\/\/)?((?:pan|e?yun)\.baidu\.com\/s\/(?:[a-z\d\-_]+)(?:#[a-z\d-_]*)?)(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_COMMON);
     };
-    //var linkifyTextBlockYunpan = function(text, eles, index) {
-    //    return generalLinkifyText(text, eles, index, /(https?:\/\/)?(yunpan\.cn\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_YUNPAN);
-    //};
+    var linkifyTextBlockLanZou = function(text, eles, index) {
+        return generalLinkifyText(text, eles, index, /(https?:\/\/)?(pan\.lanzou\.com\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi, CODE_RULE_COMMON);
+    };
     var findCodeFromElements = function(eles, index, rule) {
         for (var i = 0; i < MAX_SEARCH_CODE_RANGE && i < eles.length; i++) {
             var txt = eles[i + index].textContent;
@@ -108,7 +115,8 @@
         var eles = textNodesUnder(document.body);
         var ele, txt, loopCount;
         var processor = [
-            linkifyTextBlockBaidu
+            linkifyTextBlockBaidu,
+            linkifyTextBlockLanZou
         ];
         var callback = function(fun) {
             var data = fun(txt, eles, i + 1);
