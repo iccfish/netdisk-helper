@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网盘提取工具
 // @namespace    http://www.fishlee.net/
-// @version      3.1
+// @version      3.2
 // @description  尽可能在支持的网盘自动输入提取码，省去下载的烦恼。
 // @author       木鱼(iFish)
 // @match        *://*/*
@@ -40,6 +40,23 @@
 
         target.value = code;
         unsafeWindow.document.querySelector('#sub').dispatchEvent(new UIEvent('click'));
+    } else if (/cloud.189.cn/.test(host) && getCode()) {
+        let target = document.getElementById('code_txt');
+        if (!target)
+            return;
+
+        target.value = code;
+
+        let nameLabel = document.querySelector('.shareDate');
+        let delayFunc = () => {
+            if (!nameLabel.innerText) {
+                console.log('delay 500ms due to page load not complete.');
+                setTimeout(delayFunc, 500);
+            } else {
+                unsafeWindow.$(target.nextElementSibling).click();
+            }
+        };
+        setTimeout(delayFunc, 500);
     } else {
         //其它网站，检测链接
         Array.prototype.slice.call(document.querySelectorAll("a[href*='pan.baidu.com'], a[href*='lanzou.com'], a[href*='lanzous.com']")).forEach(function(link) {
@@ -109,6 +126,13 @@
             CODE_RULE_COMMON
         ]);
     };
+    let linkifyTextBlock189cn = function(...args) {
+        return generalLinkifyText(...[
+            ...args,
+            /(https?:\/\/)?(cloud\.189?\.cn\/t\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi,
+            CODE_RULE_COMMON
+        ]);
+    }
     let findCodeFromElements = function(eles, index, rule) {
         for (let i = 0; i < MAX_SEARCH_CODE_RANGE && i < eles.length; i++) {
             let txt = eles[i + index].textContent;
@@ -127,11 +151,12 @@
         let eles = textNodesUnder(document.body);
         let processor = [
             linkifyTextBlockBaidu,
-            linkifyTextBlockLanZou
+            linkifyTextBlockLanZou,
+            linkifyTextBlock189cn
         ];
         for (let i = 0; i < eles.length; i++) {
             let ele = eles[i];
-            if (ele.parentNode.tagName == 'a') continue;
+            if (ele.parentNode.tagName == 'a' || !ele.textContent) continue;
 
             let txt = ele.textContent;
             let loopCount = 0;
