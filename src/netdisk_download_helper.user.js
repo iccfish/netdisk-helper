@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网盘提取工具
 // @namespace    http://www.fishlee.net/
-// @version      3.2
+// @version      3.3
 // @description  尽可能在支持的网盘自动输入提取码，省去下载的烦恼。
 // @author       木鱼(iFish)
 // @match        *://*/*
@@ -33,13 +33,15 @@
             target.value = code;
             unsafeWindow.document.querySelector('form[name="accessForm"]').onsubmit();
         }
-    } else if (/(pan|d|www)\.lanzous?\.com/.test(host) && getCode()) {
+    } else if (/\.lanzou[sx]?\.com/.test(host) && getCode()) {
         let target = document.querySelector('#pwd');
         if (!target)
             return;
 
         target.value = code;
-        unsafeWindow.document.querySelector('#sub').dispatchEvent(new UIEvent('click'));
+        let btn = unsafeWindow.document.querySelector('#sub') || unsafeWindow.document.querySelector('.passwddiv-btn');
+
+        btn && btn.dispatchEvent(new UIEvent('click'));
     } else if (/cloud.189.cn/.test(host) && getCode()) {
         let target = document.getElementById('code_txt');
         if (!target)
@@ -59,7 +61,7 @@
         setTimeout(delayFunc, 500);
     } else {
         //其它网站，检测链接
-        Array.prototype.slice.call(document.querySelectorAll("a[href*='pan.baidu.com'], a[href*='lanzou.com'], a[href*='lanzous.com']")).forEach(function(link) {
+        Array.prototype.slice.call(document.querySelectorAll("a[href*='pan.baidu.com'], a[href*='lanzou.com'], a[href*='lanzous.com'], a[href*='lanzoux.com']")).forEach(function(link) {
             let txt = link.nextSibling && link.nextSibling.nodeValue;
             let linkcode = /码.*?([a-z\d]{4})/i.exec(txt) && RegExp.$1;
             if (!linkcode) {
@@ -122,7 +124,7 @@
     let linkifyTextBlockLanZou = function(...args) {
         return generalLinkifyText(...[
             ...args,
-            /(https?:\/\/)?((?:pan|d|www)\.lanzous?\.com\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi,
+            /(https?:\/\/)?((?:pan|d|www)\.lanzou[sx]?\.com\/(?:[a-z\d]+))(?:.*?码.*?([a-z\d]+))?/gi,
             CODE_RULE_COMMON
         ]);
     };
